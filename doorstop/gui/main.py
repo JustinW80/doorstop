@@ -120,9 +120,35 @@ def run(args, cwd, error):
                 root._w,
                 tk.PhotoImage(data=resources.b64_doorstopicon_png),
             )
+
         elif _platform == "darwin":
             # macOS
-            pass  # TODO
+            from doorstop.gui import resources
+            import base64
+            import tempfile
+
+            try:
+                with tempfile.TemporaryFile(
+                    mode='w+b', suffix=".icns"
+                ) as theTempIconFile:
+                    theTempIconFile.write(
+                        base64.b64decode(resources.b64_doorstopicon_icns)
+                    )
+                    theTempIconFile.flush()
+
+                # BUG: The GUI launches but the icon is a blank document.
+                root.iconbitmap(theTempIconFile.name)
+
+                # BUG: The GUI launches but the icon is absent.
+                # img = tk.Image("photo", file="docs/images/logo-black-white.gif")
+                # root.iconphoto(True, img)
+
+            finally:
+                try:
+                    os.unlink(theTempIconFile.name)
+                except Exception:  # pylint: disable=W0703
+                    pass
+
         elif _platform in ("win32", "win64"):
             # Windows
             from doorstop.gui import resources
